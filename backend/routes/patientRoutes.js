@@ -4,9 +4,11 @@ const Patient = require("../models/Patient");
 const Report = require("../models/Report");
 
 
-// ===============================
-// CREATE PATIENT
-// ===============================
+// ==================================================
+// PATIENT CRUD ROUTES
+// ==================================================
+
+// Create Patient
 router.post("/", async (req, res) => {
   try {
     const patient = await Patient.create(req.body);
@@ -16,10 +18,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-
-// ===============================
-// GET ALL PATIENTS
-// ===============================
+// Get All Patients
 router.get("/", async (req, res) => {
   try {
     const patients = await Patient.find();
@@ -29,10 +28,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-// ===============================
-// GET SINGLE PATIENT
-// ===============================
+// Get Single Patient
 router.get("/:id", async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
@@ -42,10 +38,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-
-// ===============================
-// UPDATE PATIENT
-// ===============================
+// Update Patient
 router.put("/:id", async (req, res) => {
   try {
     const updatedPatient = await Patient.findByIdAndUpdate(
@@ -59,10 +52,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-
-// ===============================
-// DELETE PATIENT
-// ===============================
+// Delete Patient
 router.delete("/:id", async (req, res) => {
   try {
     await Patient.findByIdAndDelete(req.params.id);
@@ -74,14 +64,27 @@ router.delete("/:id", async (req, res) => {
 
 
 // ==================================================
-// PHASE 5 - LAB TREND ANALYSIS
+// PHASE 5 + PHASE 6
+// TREND DETECTION + RISK FLAGGING
 // ==================================================
+
 router.get("/trends/:patientId", async (req, res) => {
   try {
     const reports = await Report.find({ patient: req.params.patientId });
 
+    if (!reports || reports.length === 0) {
+      return res.json({
+        labHistory: {},
+        trendAnalysis: {},
+        riskFlags: []
+      });
+    }
+
     let labHistory = {};
 
+    // -----------------------------------------
+    // Collect Lab History Across Reports
+    // -----------------------------------------
     reports.forEach((report) => {
 
       if (report.extractedData && report.extractedData.lab_values) {
@@ -103,7 +106,9 @@ router.get("/trends/:patientId", async (req, res) => {
       }
     });
 
-    // Sort each test by date
+    // -----------------------------------------
+    // Sort Labs Chronologically
+    // -----------------------------------------
     Object.keys(labHistory).forEach((test) => {
       labHistory[test].sort(
         (a, b) => new Date(a.date) - new Date(b.date)
@@ -111,31 +116,80 @@ router.get("/trends/:patientId", async (req, res) => {
     });
 
     let trendAnalysis = {};
+    let riskFlags = [];
 
+    // -----------------------------------------
+    // Trend + Risk Logic
+    // -----------------------------------------
     Object.keys(labHistory).forEach((test) => {
+
       const values = labHistory[test].map(entry => entry.value);
 
       if (values.length >= 2) {
+
         const first = values[0];
         const last = values[values.length - 1];
 
+        // Trend Detection
         if (last > first) {
-          trendAnalysis[test] = "Increasing Trend ⚠";
+          trendAnalysis[test] = "Increasing Trend";
         } else if (last < first) {
-          trendAnalysis[test] = "Decreasing Trend ✅";
+          trendAnalysis[test] = "Decreasing Trend";
         } else {
           trendAnalysis[test] = "Stable";
         }
+
+        // -------------------------
+        // Clinical Risk Thresholds
+        // -------------------------
+
+        if (test === "hemoglobin") {
+          if (last < 12) {
+            riskFlags.push("⚠ Hemoglobin low — Possible anemia risk");
+          }
+        }
+
+        if (test === "platelets") {
+          if (last < 2.0) {
+            riskFlags.push("⚠ Platelets low — Possible bleeding risk");
+          }
+        }
+
+        if (test === "c-reactive protein") {
+          if (trendAnalysis[test] === "Increasing Trend") {
+            riskFlags.push("⚠ CRP rising — Possible inflammatory escalation");
+          }
+        }
       }
     });
+    let summary = "No significant trends detected.";
 
+if (riskFlags.length > 0) {
+  summary = "Clinical Summary: ";
+
+  if (trendAnalysis["hemoglobin"] === "Decreasing Trend") {
+    summary += "Hemoglobin levels are declining across visits, suggesting possible anemia. ";
+  }
+
+  if (trendAnalysis["platelets"] === "Decreasing Trend") {
+    summary += "Platelet levels are decreasing, indicating potential bleeding risk. ";
+  }
+
+  if (trendAnalysis["c-reactive protein"] === "Increasing Trend") {
+    summary += "CRP levels are rising, indicating possible inflammatory progression. ";
+  }
+
+  summary += "Further clinical evaluation is recommended.";
+}
     res.json({
-      labHistory,
-      trendAnalysis
-    });
+  labHistory,
+  trendAnalysis,
+  riskFlags,
+  summary
+});
 
   } catch (error) {
-    console.error("Trend Error:", error);
+    console.error("Trend & Risk Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
