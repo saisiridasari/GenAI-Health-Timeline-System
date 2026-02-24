@@ -1,0 +1,56 @@
+/* Main container */
+.dashboard-container {
+  padding: 40px;
+  background-color: #f8f9fb;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Title */
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: #1f2937;
+}
+
+/* Card */
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+/* Section headings */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #374151;
+}
+
+/* Risk badges */
+.risk-badge {
+  background: #ffe5e5;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+/* Summary box */
+.summary-box {
+  background: #f3f4f6;
+  padding: 18px;
+  border-radius: 10px;
+  line-height: 1.6;
+  color: #111827;
+}
+
+/* Chart spacing */
+.chart-wrapper {
+  margin-bottom: 40px;
+}

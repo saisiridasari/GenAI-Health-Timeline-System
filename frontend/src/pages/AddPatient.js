@@ -19,14 +19,46 @@ function AddPatient() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Patient</h2>
-      <input placeholder="Name" onChange={e => setForm({...form, name: e.target.value})} />
-      <input placeholder="Age" onChange={e => setForm({...form, age: e.target.value})} />
-      <input placeholder="Gender" onChange={e => setForm({...form, gender: e.target.value})} />
-      <input placeholder="Contact" onChange={e => setForm({...form, contact: e.target.value})} />
-      <button type="submit">Submit</button>
-    </form>
+    <div className="page-container">
+      <h1 className="page-title">Add New Patient</h1>
+
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+          <input
+            className="input-field"
+            placeholder="Full Name"
+            onChange={e => setForm({...form, name: e.target.value})}
+            required
+          />
+
+          <input
+            className="input-field"
+            placeholder="Age"
+            type="number"
+            onChange={e => setForm({...form, age: e.target.value})}
+            required
+          />
+
+          <input
+            className="input-field"
+            placeholder="Gender"
+            onChange={e => setForm({...form, gender: e.target.value})}
+            required
+          />
+
+          <input
+            className="input-field"
+            placeholder="Contact"
+            onChange={e => setForm({...form, contact: e.target.value})}
+            required
+          />
+
+          <button className="btn-primary" type="submit">
+            Save Patient
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
 

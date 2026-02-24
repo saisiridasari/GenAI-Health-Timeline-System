@@ -1,0 +1,92 @@
+/* ===== GLOBAL LAYOUT ===== */
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f8f9fb;
+  color: #1f2937;
+}
+
+/* Container */
+.page-container {
+  padding: 40px;
+}
+
+/* Page Title */
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+/* Card */
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px;
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Input */
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}

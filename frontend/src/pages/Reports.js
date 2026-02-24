@@ -8,69 +8,61 @@ function Reports() {
   const [file, setFile] = useState(null);
 
   useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5000/api/reports/${id}`
-        );
-        setReports(res.data);
-      } catch (error) {
-        console.error("Error fetching reports:", error);
-      }
-    };
-
     fetchReports();
   }, [id]);
+
+  const fetchReports = async () => {
+    const res = await axios.get(`http://localhost:5000/api/reports/${id}`);
+    setReports(res.data);
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("report", file);
 
-    try {
-      await axios.post(
-        `http://localhost:5000/api/reports/${id}`,
-        formData
-      );
-
-      // Refresh reports after upload
-      const res = await axios.get(
-        `http://localhost:5000/api/reports/${id}`
-      );
-      setReports(res.data);
-
-    } catch (error) {
-      console.error("Upload error:", error);
-    }
+    await axios.post(`http://localhost:5000/api/reports/${id}`, formData);
+    fetchReports();
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Patient Reports</h2>
+    <div className="page-container">
+      <h1 className="page-title">Patient Reports</h1>
 
-      <form onSubmit={handleUpload}>
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={(e) => setFile(e.target.files[0])}
-          required
-        />
-        <button type="submit">Upload</button>
-      </form>
+      <div className="card">
+        <form onSubmit={handleUpload}>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setFile(e.target.files[0])}
+            required
+          />
+          <button className="btn-primary" type="submit" style={{ marginLeft: "10px" }}>
+            Upload
+          </button>
+        </form>
+      </div>
 
-      <ul>
-        {reports.map((r) => (
-          <li key={r._id}>
-            <a
-              href={`http://localhost:5000/${r.filePath}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {r.fileName}
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div className="card">
+        <h3>Uploaded Reports</h3>
+        {reports.length === 0 ? (
+          <p>No reports uploaded yet.</p>
+        ) : (
+          <ul>
+            {reports.map((r) => (
+              <li key={r._id} style={{ marginBottom: "10px" }}>
+                <a
+                  href={`http://localhost:5000/${r.filePath}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {r.fileName}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
