@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import AddPatient from "./pages/AddPatient";
 import Reports from "./pages/Reports";
 import PatientTrends from "./pages/PatientTrends";
+import PatientProfile from "./pages/PatientProfile";
+
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
           <Route path="/add" element={<AddPatient />} />
           <Route path="/reports/:id" element={<Reports />} />
           <Route path="/trends/:id" element={<PatientTrends />} />
+          <Route path="/patients/:id" element={<PatientProfile />} />
         </Routes>
       </Layout>
     </Router>

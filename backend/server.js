@@ -15,6 +15,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/patients", require("./routes/patientRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/uploads", express.static("uploads"));
+app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 
 const PORT = process.env.PORT || 5000;
 
