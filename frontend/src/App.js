@@ -6,6 +6,7 @@ import AddPatient from "./pages/AddPatient";
 import Reports from "./pages/Reports";
 import PatientTrends from "./pages/PatientTrends";
 import PatientProfile from "./pages/PatientProfile";
+import IntelligenceCenter from "./pages/IntelligenceCenter";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/reports/:id" element={<Reports />} />
           <Route path="/trends/:id" element={<PatientTrends />} />
           <Route path="/patients/:id" element={<PatientProfile />} />
+          <Route path="/intelligence" element={<IntelligenceCenter />} />
         </Routes>
       </Layout>
     </Router>

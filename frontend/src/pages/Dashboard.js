@@ -23,6 +23,7 @@ ChartJS.register(
 function Dashboard() {
   const [overview, setOverview] = useState(null);
   const [patients, setPatients] = useState([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchOverview();
@@ -30,36 +31,30 @@ function Dashboard() {
   }, []);
 
   const fetchOverview = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard/overview"
-      );
-      setOverview(res.data);
-    } catch (error) {
-      console.error(error);
-    }
+    const res = await axios.get(
+      "http://localhost:5000/api/dashboard/overview"
+    );
+    setOverview(res.data);
   };
 
   const fetchPatients = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/patients"
-      );
-      setPatients(res.data);
-    } catch (error) {
-      console.error(error);
-    }
+    const res = await axios.get(
+      "http://localhost:5000/api/patients"
+    );
+    setPatients(res.data);
   };
 
-  if (!overview) {
-    return <div style={{ padding: "40px" }}>Loading...</div>;
-  }
+  if (!overview) return <div style={{ padding: 40 }}>Loading...</div>;
+
+  const filteredPatients = patients.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p._id.includes(search)
+  );
 
   const barData = {
     labels: Object.keys(overview.conditionDistribution || {}),
     datasets: [
       {
-        label: "Cases",
         data: Object.values(overview.conditionDistribution || {}),
         backgroundColor: "#2563eb"
       }
@@ -71,98 +66,80 @@ function Dashboard() {
       <h1 className="page-title">Clinical Overview</h1>
 
       {/* ===== Metrics ===== */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "20px",
-          marginBottom: "40px"
-        }}
-      >
+      <div style={metricGrid}>
         <Metric title="Total Patients" value={overview.totalPatients} />
         <Metric title="Total Reports" value={overview.totalReports} />
         <Metric title="Active Risks" value={overview.totalRisks} />
         <Metric title="High Risk Patients" value={overview.highRiskPatients} />
       </div>
 
-      {/* ===== Chart + Summary ===== */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "30px",
-          marginBottom: "50px"
-        }}
-      >
-        <div className="card">
-          <h3 style={{ marginBottom: "20px" }}>
-            Condition Distribution
-          </h3>
-
-          <div style={{ height: "250px" }}>
-            <Bar
-              data={barData}
-              options={{
-                indexAxis: "y",
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false }
-                }
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="card">
-          <h3 style={{ marginBottom: "20px" }}>
-            System Summary
-          </h3>
-
-          <p style={{ color: "#6b7280", lineHeight: "1.6" }}>
-            The platform is tracking{" "}
-            <strong>{overview.totalPatients}</strong> patients with{" "}
-            <strong>{overview.totalReports}</strong> uploaded reports.
-            <br />
-            Active clinical risks detected:{" "}
-            <strong>{overview.totalRisks}</strong>.
-          </p>
+      {/* ===== Chart ===== */}
+      <div className="card" style={{ marginBottom: 40 }}>
+        <h3 style={{ marginBottom: 20 }}>Condition Distribution</h3>
+        <div style={{ height: 160 }}>
+          <Bar
+            data={barData}
+            options={{
+              indexAxis: "y",
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } }
+            }}
+          />
         </div>
       </div>
 
       {/* ===== Patient Table ===== */}
       <div className="card">
-        <h3 style={{ marginBottom: "20px" }}>
-          Patient Registry
-        </h3>
+        <div style={tableHeader}>
+          <h3>Patient Registry</h3>
 
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse"
-          }}
-        >
+          <input
+            placeholder="Search by Name or Patient ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={searchInput}
+          />
+        </div>
+
+        <table style={tableStyle}>
           <thead>
             <tr style={{ background: "#f3f4f6" }}>
-              <th style={thStyle}>Name</th>
-              <th style={thStyle}>Age</th>
-              <th style={thStyle}>Gender</th>
-              <th style={thStyle}>Contact</th>
-              <th style={thStyle}>Intelligence</th>
+              <th style={th}>Name</th>
+              <th style={th}>Age</th>
+              <th style={th}>Gender</th>
+              <th style={th}>Contact</th>
+              <th style={th}>Risk</th>
+              <th style={th}>Action</th>
             </tr>
           </thead>
           <tbody>
-            {patients.map((patient) => (
-              <tr key={patient._id}>
-                <td style={tdStyle}>{patient.name}</td>
-                <td style={tdStyle}>{patient.age}</td>
-                <td style={tdStyle}>{patient.gender}</td>
-                <td style={tdStyle}>{patient.contact}</td>
-                <td style={tdStyle}>
-                  <Link to={`/patients/${patient._id}`}>
-                    <button style={btnStyle}>
-                      Open Intelligence
-                    </button>
+            {filteredPatients.map((p) => (
+              <tr
+                key={p._id}
+                style={{
+                  background: p.riskScore > 70 ? "#fef2f2" : "white"
+                }}
+              >
+                <td style={td}>{p.name}</td>
+                <td style={td}>{p.age}</td>
+                <td style={td}>{p.gender}</td>
+                <td style={td}>{p.contact}</td>
+
+                {/* Risk Badge */}
+                <td style={td}>
+                  {p.riskScore > 70 ? (
+                    <span style={badgeHigh}>High</span>
+                  ) : p.riskScore > 40 ? (
+                    <span style={badgeMid}>Moderate</span>
+                  ) : (
+                    <span style={badgeLow}>Low</span>
+                  )}
+                </td>
+
+                <td style={td}>
+                  <Link to={`/patients/${p._id}`}>
+                    <button style={btn}>Open</button>
                   </Link>
                 </td>
               </tr>
@@ -174,44 +151,79 @@ function Dashboard() {
   );
 }
 
+/* ===== Components ===== */
+
 function Metric({ title, value }) {
   return (
     <div className="card">
-      <div style={{ fontSize: "13px", color: "#6b7280" }}>
-        {title}
-      </div>
-      <div
-        style={{
-          fontSize: "26px",
-          fontWeight: "600",
-          marginTop: "8px"
-        }}
-      >
-        {value}
-      </div>
+      <div style={{ fontSize: 13, color: "#6b7280" }}>{title}</div>
+      <div style={{ fontSize: 26, fontWeight: 600 }}>{value}</div>
     </div>
   );
 }
 
-const thStyle = {
-  padding: "12px",
-  textAlign: "left",
-  fontSize: "14px"
+/* ===== Styles ===== */
+
+const metricGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(4,1fr)",
+  gap: 20,
+  marginBottom: 40
 };
 
-const tdStyle = {
-  padding: "12px",
+const tableHeader = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 20
+};
+
+const searchInput = {
+  padding: "8px 12px",
+  borderRadius: 6,
+  border: "1px solid #d1d5db",
+  width: 250
+};
+
+const tableStyle = { width: "100%", borderCollapse: "collapse" };
+const th = { padding: 12, textAlign: "left", fontSize: 14 };
+const td = {
+  padding: 12,
   borderBottom: "1px solid #e5e7eb",
-  fontSize: "14px"
+  fontSize: 14
 };
 
-const btnStyle = {
+const btn = {
   padding: "6px 12px",
-  borderRadius: "6px",
+  borderRadius: 6,
   border: "none",
   background: "#2563eb",
   color: "white",
   cursor: "pointer"
+};
+
+const badgeHigh = {
+  background: "#fee2e2",
+  color: "#991b1b",
+  padding: "4px 10px",
+  borderRadius: 20,
+  fontSize: 12
+};
+
+const badgeMid = {
+  background: "#fef3c7",
+  color: "#92400e",
+  padding: "4px 10px",
+  borderRadius: 20,
+  fontSize: 12
+};
+
+const badgeLow = {
+  background: "#dcfce7",
+  color: "#166534",
+  padding: "4px 10px",
+  borderRadius: 20,
+  fontSize: 12
 };
 
 export default Dashboard;
