@@ -2,78 +2,182 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function PatientTimeline({ patientId }) {
-  const [reports, setReports] = useState([]);
+
+  const [groupedTimeline, setGroupedTimeline] = useState({});
+  const [openDate, setOpenDate] = useState(null);
 
   useEffect(() => {
-    fetchReports();
+    fetchTimeline();
   }, [patientId]);
 
-  const fetchReports = async () => {
+  // ==============================
+  // FETCH TIMELINE
+  // ==============================
+  const fetchTimeline = async () => {
+
     try {
+
       const res = await axios.get(
         `http://localhost:5000/api/reports/${patientId}`
       );
-      setReports(res.data);
+
+      let allTimeline = [];
+
+      res.data.forEach((report) => {
+
+        if (
+          report.extractedData &&
+          report.extractedData.timeline
+        ) {
+
+          allTimeline = [
+            ...allTimeline,
+            ...report.extractedData.timeline
+          ];
+        }
+      });
+
+      // ==============================
+      // GROUP EVENTS BY DATE
+      // ==============================
+      const grouped = {};
+
+      allTimeline.forEach((item) => {
+
+        if (!grouped[item.date]) {
+          grouped[item.date] = [];
+        }
+
+        grouped[item.date].push(item.event);
+
+      });
+
+      setGroupedTimeline(grouped);
+
     } catch (error) {
+
       console.error("Timeline fetch error:", error);
+
     }
   };
 
-  // Merge all timeline events
-  const mergedTimeline = reports
-    .flatMap(report =>
-      report.extractedData?.timeline?.map(event => ({
-        ...event,
-        uploadDate: report.uploadDate
-      })) || []
-    )
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  if (!reports.length) return <div>Loading...</div>;
+  // ==============================
+  // SORT DATES
+  // ==============================
+  const sortedDates = Object.keys(groupedTimeline).sort(
+    (a, b) => new Date(b) - new Date(a)
+  );
 
   return (
-    <div className="card">
-      <h3 style={{ marginBottom: "20px" }}>
-        Master Timeline
-      </h3>
+    <div>
 
-      {mergedTimeline.length === 0 ? (
-        <p style={{ color: "#6b7280" }}>
+      <h2 style={{ marginBottom: "20px" }}>
+        Clinical Timeline
+      </h2>
+
+      {sortedDates.length === 0 ? (
+
+        <div className="card">
           No timeline events available.
-        </p>
+        </div>
+
       ) : (
-        <div style={{ borderLeft: "3px solid #2563eb", paddingLeft: "20px" }}>
-          {mergedTimeline.map((item, index) => (
+
+        sortedDates.map((date, index) => (
+
+          <div
+            key={index}
+            className="card"
+            style={{
+              marginBottom: "14px",
+              padding: "18px"
+            }}
+          >
+
+            {/* HEADER */}
             <div
-              key={index}
+              onClick={() =>
+                setOpenDate(
+                  openDate === date
+                    ? null
+                    : date
+                )
+              }
               style={{
-                marginBottom: "25px",
-                position: "relative"
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer"
               }}
             >
+
+              <div>
+
+                <div
+                  style={{
+                    fontSize: "13px",
+                    color: "#6b7280",
+                    marginBottom: "5px"
+                  }}
+                >
+                  Clinical Visit Date
+                </div>
+
+                <strong>{date}</strong>
+
+              </div>
+
               <div
                 style={{
-                  position: "absolute",
-                  left: "-28px",
-                  top: "5px",
-                  width: "12px",
-                  height: "12px",
-                  background: "#2563eb",
-                  borderRadius: "50%"
+                  fontSize: "24px",
+                  fontWeight: "500",
+                  color: "#2563eb"
                 }}
-              />
-
-              <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                {item.date}
+              >
+                {openDate === date ? "−" : "+"}
               </div>
 
-              <div style={{ fontSize: "15px", marginTop: "5px" }}>
-                {item.event}
-              </div>
             </div>
-          ))}
-        </div>
+
+            {/* EXPANDABLE BODY */}
+            {openDate === date && (
+
+              <div
+                style={{
+                  marginTop: "20px",
+                  paddingTop: "15px",
+                  borderTop: "1px solid #e5e7eb"
+                }}
+              >
+
+                {groupedTimeline[date].map(
+                  (event, idx) => (
+
+                    <div
+                      key={idx}
+                      style={{
+                        padding: "12px 0",
+                        borderBottom:
+                          "1px solid #f3f4f6",
+                        color: "#374151"
+                      }}
+                    >
+                      • {event}
+                    </div>
+
+                  )
+                )}
+
+              </div>
+
+            )}
+
+          </div>
+
+        ))
+
       )}
+
     </div>
   );
 }

@@ -81,45 +81,54 @@ function PatientEvolution({ patientId }) {
   );
 
   return (
-    <div style={{ display: "grid", gap: "25px" }}>
 
-      <Section
-        title="New Conditions Detected"
-        items={newConditions}
-        bg="#fee2e2"
-        color="#991b1b"
-      />
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns:
+        "repeat(2, 1fr)",
+      gap: "25px"
+    }}
+  >
 
-      <Section
-        title="Resolved Conditions"
-        items={resolvedConditions}
-        bg="#dcfce7"
-        color="#166534"
-      />
+    <Section
+      title="New Conditions Detected"
+      items={newConditions}
+      bg="#fee2e2"
+      color="#991b1b"
+    />
 
-      <Section
-        title="Persistent Conditions"
-        items={persistentConditions}
-        bg="#e0f2fe"
-        color="#075985"
-      />
+    <Section
+      title="Resolved Conditions"
+      items={resolvedConditions}
+      bg="#dcfce7"
+      color="#166534"
+    />
 
-      <Section
-        title="Medications Added"
-        items={addedMeds}
-        bg="#ede9fe"
-        color="#5b21b6"
-      />
+    <Section
+      title="Persistent Conditions"
+      items={persistentConditions}
+      bg="#e0f2fe"
+      color="#075985"
+    />
 
-      <Section
-        title="Medications Discontinued"
-        items={discontinuedMeds}
-        bg="#fef3c7"
-        color="#92400e"
-      />
+    <Section
+      title="Medications Added"
+      items={addedMeds}
+      bg="#ede9fe"
+      color="#5b21b6"
+    />
 
-    </div>
-  );
+    <Section
+      title="Medications Discontinued"
+      items={discontinuedMeds}
+      bg="#fef3c7"
+      color="#92400e"
+    />
+
+  </div>
+
+);
 }
 
 function Section({ title, items, bg, color }) {
